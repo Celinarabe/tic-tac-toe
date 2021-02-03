@@ -3,8 +3,8 @@ var gameBoard = (() => {
   var spaces = new Array(9).fill('');
 
   //cache DOM
-  //Node list of all blocks
-  var blocks = document.querySelectorAll(".block")
+  var blocks = document.querySelectorAll(".block")   //Node list of all blocks
+  var winnerDisplay = document.getElementById('winnerDisplay'); 
 
   function getBlock(blockID){
     return document.getElementById(blockID)
@@ -41,15 +41,15 @@ var gameBoard = (() => {
 
   //check diagonals
   if (spaces[0] == playerMark && spaces[4] == playerMark && spaces[8] == playerMark){
-    return true
+    win = true
   }
   if (spaces[2] == playerMark && spaces[4] == playerMark && spaces[6] == playerMark){
-    return true
+    win = true
   }
 
   if (win){
-  gameBoard.endGame(playerMark)
-      
+    gameController.gameOver = true
+  endGame(playerMark)
   }
   }
 
@@ -72,19 +72,13 @@ var gameBoard = (() => {
     }
   }
 
-  //TERNARY FUNCT
   function endGame(playerMark){
-    if (playerMark == 'X'){
-      winner = "Player"
-    }
-    else {
-      winner = "Computer"
-    }
+    gameController.winner = playerMark == 'X'? "Player":"Computer"
     free_blocks = getFreeBlocks()
     for (var i=0; i<free_blocks.length; i++){
       free_blocks[i].classList.add('disabled');
     }
-    winnerDisplay.innerHTML = `${winner} Wins`
+    winnerDisplay.innerHTML = `${gameController.winner} Wins`
   }
 
   function render() {
@@ -97,11 +91,8 @@ var gameBoard = (() => {
   
   render()
   return {
-    spaces,
     addMove,
-    checkWinner,
-    getFreeBlocks,
-    endGame
+    getFreeBlocks
   }
 })();
 
@@ -111,36 +102,32 @@ var gameBoard = (() => {
 //gamecontroller module
 var gameController = (() => {
   var turn = 'p1';
-  //cache DOM
-  var winnerDisplay = document.getElementById('winnerDisplay'); 
+  var gameOver = false;
+  var winner;
 
 
-  //TERNARY is there a way to have event listener?
-  function playerMove(blockID, playerMark){
+  function playerMove(blockID){
     if(turn == 'p1'){
-    gameBoard.addMove(blockID, playerMark)
+    gameBoard.addMove(blockID, p1.getMark())
     turn = 'c1';
+    if (!gameOver){
     compMove();  
+    }
   }
 }
-
 
   function compMove(){
     const free_blocks = gameBoard.getFreeBlocks();
     var item = free_blocks[Math.floor(Math.random() * free_blocks.length)];
-    gameBoard.addMove(item.id, 'O');
+    gameBoard.addMove(item.id, c1.getMark());
     turn = 'p1'
   }
 
-
   return {
-    turn,
     playerMove,
-    compMove
+    winner
   }
-
 })();
-
 
 
 
@@ -155,21 +142,16 @@ var Player = (name, mark) => {
   function getMark() {
     return mark;
   }
-  function setName(newName) {
-    name = newName;
-  }
 
   return {
     getName,
     getMark,
-    setName
   }
 };
 
 
-console.log(gameBoard.spaces)
 p1 = Player('Player', 'X');
 c1 = Player('Computer', 'O')
-console.log(p1.getName());
+
 
 
