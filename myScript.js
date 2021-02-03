@@ -3,40 +3,26 @@ var gameBoard = (() => {
   var spaces = new Array(9).fill('');
 
   //cache DOM
-  //NODE LIST OF ALL BLOCKS
+  //Node list of all blocks
   var blocks = document.querySelectorAll(".block")
-  render()
-
-  function render() {
-    var blocks = document.getElementsByClassName("block");
-    space_counter = 0
-    for (var i = 0; i < blocks.length; i++) {
-      blocks[i].innerHTML = spaces[space_counter];
-
-      space_counter++;
-    }
-
-  }
-
-
-
-
 
   function getBlock(blockID){
     return document.getElementById(blockID)
   }
+
 
   function checkVacant(block) {
     return (block.classList.contains('occupied')? false : true);
   }
 
   function checkWinner(playerMark){
+    win = false
     //check columns
     for (var i=0; i<=3; i++){
       if (spaces[i]==playerMark){
         if (spaces[i+3]==playerMark){
           if (spaces[i+6]==playerMark){
-            return true
+            win = true
           }
         }     
     }
@@ -47,7 +33,7 @@ var gameBoard = (() => {
     if (spaces[i]==playerMark){
       if (spaces[i+1]==playerMark){
         if (spaces[i+2]==playerMark){
-          return true
+          win = true
         }
       }     
   }
@@ -60,9 +46,15 @@ var gameBoard = (() => {
   if (spaces[2] == playerMark && spaces[4] == playerMark && spaces[6] == playerMark){
     return true
   }
+
+  if (win){
+  gameBoard.endGame(playerMark)
+      
+  }
   }
 
   function getFreeBlocks() {
+    //convert nodelist to filterable array
     var free_blocks = Array.from(blocks).filter(element => !(element.classList.contains('occupied')));
     //returns array
     return free_blocks;
@@ -73,21 +65,37 @@ var gameBoard = (() => {
     blockElement = getBlock(blockID)
     if (checkVacant(blockElement)) {
       var str = blockID.split("_");
-    spaces[str[1]] = playerMark;    
-    blockElement.classList.add('occupied', 'disabled');
-    render();
+      spaces[str[1]] = playerMark;    
+      blockElement.classList.add('occupied', 'disabled');
+      render();
+      checkWinner(playerMark)
     }
   }
 
-  function endGame(){
+  //TERNARY FUNCT
+  function endGame(playerMark){
+    if (playerMark == 'X'){
+      winner = "Player"
+    }
+    else {
+      winner = "Computer"
+    }
     free_blocks = getFreeBlocks()
     for (var i=0; i<free_blocks.length; i++){
       free_blocks[i].classList.add('disabled');
     }
-    
+    winnerDisplay.innerHTML = `${winner} Wins`
+  }
+
+  function render() {
+    space_counter = 0
+    for (var i = 0; i < blocks.length; i++) {
+      blocks[i].innerHTML = spaces[space_counter];
+      space_counter++;
+    }
   }
   
-
+  render()
   return {
     spaces,
     addMove,
@@ -107,39 +115,22 @@ var gameController = (() => {
   var winnerDisplay = document.getElementById('winnerDisplay'); 
 
 
-
+  //TERNARY is there a way to have event listener?
   function playerMove(blockID, playerMark){
     if(turn == 'p1'){
-
     gameBoard.addMove(blockID, playerMark)
-    if (gameBoard.checkWinner('X')) {
-      gameBoard.endGame()
-      winnerDisplay.innerHTML = "You Win"
-      }
-    
-    else{
     turn = 'c1';
-    compMove();
-    }
+    compMove();  
   }
 }
 
-function displayWinner(winner){
-
-} 
 
   function compMove(){
     const free_blocks = gameBoard.getFreeBlocks();
     var item = free_blocks[Math.floor(Math.random() * free_blocks.length)];
     gameBoard.addMove(item.id, 'O');
-    if (gameBoard.checkWinner('O')){
-      winnerDisplay.innerHTML = "Computer Wins"
-    }
-    else{
     turn = 'p1'
   }
-}
-
 
 
   return {
