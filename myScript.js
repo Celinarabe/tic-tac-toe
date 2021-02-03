@@ -16,7 +16,7 @@ var gameBoard = (() => {
   }
 
   function checkWinner(playerMark){
-    win = false
+    var win = false
     //check columns
     for (var i=0; i<=3; i++){
       if (spaces[i]==playerMark){
@@ -48,7 +48,8 @@ var gameBoard = (() => {
   }
 
   if (win){
-    gameController.gameOver = true
+    console.log('SOMEONE WON')
+    
   endGame(playerMark)
   }
   }
@@ -74,12 +75,15 @@ var gameBoard = (() => {
 
   function endGame(playerMark){
     gameController.winner = playerMark == 'X'? "Player":"Computer"
+    gameController.setGameOver(true)
+    console.log('CAME CONTROLLER IN END GAMNE:', gameController.gameOver)
     free_blocks = getFreeBlocks()
     for (var i=0; i<free_blocks.length; i++){
       free_blocks[i].classList.add('disabled');
     }
     winnerDisplay.innerHTML = `${gameController.winner} Wins`
   }
+
 
   function render() {
     space_counter = 0
@@ -100,32 +104,36 @@ var gameBoard = (() => {
 
 
 //gamecontroller module
-var gameController = (() => {
-  var turn = 'p1';
-  var gameOver = false;
+let gameController = (() => {
+  let turn = 'p1';
+  let gameOver = false;
   var winner;
 
-
+  function setGameOver(val) {
+    gameOver = val;
+  }
   function playerMove(blockID){
     if(turn == 'p1'){
     gameBoard.addMove(blockID, p1.getMark())
-    turn = 'c1';
-    if (!gameOver){
-    compMove();  
-    }
+    if (gameOver == false){
+      turn = 'c1';  
+      compMove();  
   }
 }
 
+
   function compMove(){
-    const free_blocks = gameBoard.getFreeBlocks();
+    let free_blocks = gameBoard.getFreeBlocks();
     var item = free_blocks[Math.floor(Math.random() * free_blocks.length)];
     gameBoard.addMove(item.id, c1.getMark());
     turn = 'p1'
   }
+}
 
   return {
     playerMove,
-    winner
+    winner,
+    setGameOver
   }
 })();
 
